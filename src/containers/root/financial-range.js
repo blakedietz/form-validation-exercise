@@ -1,7 +1,16 @@
 import React from "react";
+import TextField from '@material-ui/core/TextField';
 import {Field} from "redux-form";
-import {isValidShorthand} from "../../services/numeric-formatting/numeric-formatting";
 import {convertMagnitudeShortHandToNumeric} from "../../services/numeric-formatting/numeric-formatting";
+import {isValidShorthand} from "../../services/numeric-formatting/numeric-formatting";
+import Button from '@material-ui/core/Button';
+import {withStyles} from "@material-ui/core/styles";
+
+const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+    }
+});
 
 // Stole this from: https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
 const isEmpty = (obj) => Object.entries(obj).length === 0 && obj.constructor === Object;
@@ -9,25 +18,20 @@ const isEmpty = (obj) => Object.entries(obj).length === 0 && obj.constructor ===
 const shortCutExpansionNormalizer = (value) => (isValidShorthand(value) ? convertMagnitudeShortHandToNumeric(value) : value);
 
 const validateNumericField = (value) => {
-        if ((value !== undefined && isNaN(Number(value))) || (typeof Number(value) !== "number" && !isValidShorthand(value))) {
-            return "Value must be a number or numeric shorthand such as 2.5k"
-        }
-        else {
-            return undefined;
-        }
+    if ((value !== undefined && isNaN(Number(value))) || (typeof Number(value) !== "number" && !isValidShorthand(value))) {
+        return "Must be numeric"
+    } else {
+        return undefined;
+    }
 };
 
 export const validate = ({min, max}) => {
     let errors = {};
 
-
-    console.log(`min ${min}, max ${max}`);
     // TODO: (bdietz) - talk with designer/tech writer about proper copy
     if ((max === undefined && min !== undefined)) {
-        errors.max= "Required";
-    }
-
-    else if ((max !== undefined && min === undefined)) {
+        errors.max = "Required";
+    } else if ((max !== undefined && min === undefined)) {
         errors.min = "Required";
     }
 
@@ -43,18 +47,20 @@ export const validate = ({min, max}) => {
 };
 
 
-const renderField = ({input, label, type, meta: {error}}) => (
-    <div>
-        <label>{label}</label>
-        <div>
-            <input {...input} placeholder={label} type={type}/>
-            {(error && <span>{error}</span>)}
-        </div>
-    </div>
-);
+const renderField = ({input, label, type, meta: {error}}) => {
+    if (error) {
+        return (<TextField error
+                           label={error}
+                           {...input}
+        />);
 
-const FinancialRange = props => {
-    const {handleSubmit, pristine, valid} = props;
+    } else {
+        return <TextField label={label} {...input}/>;
+    }
+};
+
+let FinancialRange = props => {
+    const {classes, handleSubmit, valid} = props;
     return (
         <form onSubmit={handleSubmit} autoComplete="off">
             <div>
@@ -77,9 +83,19 @@ const FinancialRange = props => {
             </div>
             {/*// TODO: (bdietz) - come up with default submit values*/}
             {/* // TODO: (bdietz) - submit to actual endpoint or mock...*/}
-            <button type="submit" disabled={!(pristine || valid)}>Submit</button>
+            {/*<button type="submit" disabled={!(pristine || valid)}>Submit</button>*/}
+            <Button
+                type="submit"
+                variant="contained"
+                className={classes.button}
+                disabled={!valid}
+            >
+               Submit
+            </Button>
         </form>
     );
 };
+
+FinancialRange = withStyles(styles)(FinancialRange);
 
 export {FinancialRange};
