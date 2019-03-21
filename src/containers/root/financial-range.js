@@ -36,7 +36,7 @@ export const validate = ({min, max}) => {
     }
 
 
-    if (isEmpty(errors) && (max <= min)) {
+    if (isEmpty(errors) && (min >= max)) {
         errors = {
             // TODO: (bdietz) - talk with designer/tech writer about proper copy
             max: "Max must be greater than min"
